@@ -1,0 +1,988 @@
+
+//Написать программу «Телефонная книга», содержащая структуру с полями :
+//a.ФИО
+//b.Номер телефона
+//c.Email
+//Функции :
+//a) - добавления  в телефонную книгу "++"
+//b) - удаления из телефонной книги "++"
+//c) - сортировка по имени "++"
+//d) - проверка адреса электронной почты на нормальность(кол - во @ и точек, длина имени и домена и пр) "++", также проверить номер телефона на реальность(только цифры и спецсимволы)
+//e) - редактирование полей по выбору пользователя "++"
+//f) - чтения данных из файла "++"
+//g) - запись в файл "++"
+//h) - реализовать механизм, который позволял бы пользователю делать некоторые телефоны избранными, чтоб к ним был простой доступ и вывести список избранных. "++"
+//Стоит сказать, что за 100 % выполнение данных задач максимальная оценка – 10 баллов.Чтоб получить более высокую оценку необходимо добавить нечто,
+//не рассматриваемое в курсе и изученное самостоятельно – цветовое оформление"++", подключить управление при помощи клавиатуры или что то на свое усмотрение.
+
+#include <iostream>
+#include <iomanip>
+#include<fstream>
+#include<string>
+#include <Windows.h>
+#include <stdio.h>
+#include <conio.h>
+#include <regex>
+
+#pragma warning(disable: 4996)
+
+using namespace std;
+
+//класс телефонная книга
+class telef
+{
+private:
+	char* Lname;//фамилия
+	char* Fname;//имя
+	char* Sname;//отчество
+
+	int coun;//страна
+	char* tel;//телефон
+	char* mail;//почта
+
+	int ind;//идентификатор избранности
+public:
+	void Set(char* Lname, char* Fname, char* Sname, int coun, char* tel, char* mail, int ind)// набор сеттеров
+	{
+		this->Lname = new char[strlen(Lname) + 1];
+		strcpy(this->Lname, Lname);
+		this->Fname = new char[strlen(Fname) + 1];
+		strcpy(this->Fname, Fname);
+		this->Sname = new char[strlen(Sname) + 1];
+		strcpy(this->Sname, Sname);
+
+		this->coun = coun;
+		this->tel = new char[strlen(tel) + 1];
+		strcpy(this->tel, tel);
+		this->mail = new char[strlen(mail) + 1];
+		strcpy(this->mail, mail);
+
+		this->ind = ind;
+	}
+	void Set_Fname(char* Fname)
+	{
+		this->Fname = new char[strlen(Fname) + 1];
+		strcpy(this->Fname, Fname);
+	}
+	void Set_Sname(char* Sname)
+	{
+		this->Sname = new char[strlen(Sname) + 1];
+		strcpy(this->Sname, Sname);
+	}
+	void Set_Lname(char* Lname)
+	{
+		this->Lname = new char[strlen(Lname) + 1];
+		strcpy(this->Lname, Lname);
+	}
+	void Set_coun(int coun) { this->coun = coun; }
+	void Set_tel(char* tel)
+	{
+		this->tel = new char[strlen(tel) + 1];
+		strcpy(this->tel, tel);
+	}
+	void Set_mail(char* mail)
+	{
+		this->mail = new char[strlen(mail) + 1];
+		strcpy(this->mail, mail);
+	}
+	void Set_ind(int ind) { this->ind = ind; }
+	void Del()//очистка памяти строки
+	{
+		delete[] Lname;
+	}
+	void Show()//показ экземпляра класса
+	{
+		cout << setw(14) << Lname << setw(14) << Fname << setw(20) << Sname << setw(8) << coun;
+		cout << setw(15) << tel << setw(30) << mail << setw(7) << ind << "\n";
+	}
+	char* Get_Fname() { return Fname; }// набор геттеров
+	char* Get_Sname() { return Sname; }
+	char* Get_Lname() { return Lname; }
+	int Get_Coun() { return coun; }
+	char* Get_tel() { return tel; }
+	char* Get_mail() { return mail; }
+	int Get_ind() { return ind; }
+
+	void Edit_Lame(char* temp1)// набор редакторов экземпляров класса
+	{
+		cin.ignore();
+		cout << "Enter  new Last name of person\n"; cin.getline(temp1, 100);
+		this->Lname = new char[strlen(temp1) + 1];
+		strcpy(this->Lname, temp1);
+	}
+	void Edit_Fame(char* temp1)
+	{
+		cin.ignore();
+		cout << "Enter  new First name of person\n"; cin.getline(temp1, 100);
+		this->Fname = new char[strlen(temp1) + 1];
+		strcpy(this->Fname, temp1);
+	}
+	void Edit_Sname(char* temp1)
+	{
+		cin.ignore();
+		cout << "Enter  new Second name of Person\n"; cin.getline(temp1, 100);
+		this->Sname = new char[strlen(temp1) + 1];
+		strcpy(this->Sname, temp1);
+	}
+	void Edit_Tel(char* temp1)
+	{
+		cin.ignore();
+		cout << "Enter  new phone number of person\n"; cin.getline(temp1, 100);
+		this->tel = new char[strlen(temp1) + 1];
+		strcpy(this->tel, temp1);
+	}
+	void Edit_Mail(char* temp1)
+	{
+		cin.ignore();
+		cout << "Enter  new Email of person\n"; cin.getline(temp1, 100);
+		this->mail = new char[strlen(temp1) + 1];
+		strcpy(this->mail, temp1);
+	}
+	void Edit_Coun(int temp)
+	{
+		cout << "Enter new code of country\n";
+		cin >> temp;
+		this->coun = temp;
+	}
+	void Edit_Ind(int temp)
+	{
+		cout << "Enter elected number\n";
+		cin >> temp;
+		this->ind = temp;
+	}
+
+};
+class country
+{
+private:
+	char* Name;
+	int code;
+
+public:
+	void Set(char* Name, int code)
+	{
+		this->Name = new char[strlen(Name) + 1];
+		strcpy(this->Name, Name);
+		this->code = code;
+	}
+	void Set_Name(char* Name)
+	{
+		this->Name = new char[strlen(Name) + 1];
+		strcpy(this->Name, Name);
+	}
+	void Set_code(int code) { this->code = code; }
+	void Del()
+	{
+		delete[] Name;
+	}
+	void Show()
+	{
+		cout << setw(30) << Name << setw(10) << code << "\n";
+	}
+	char* Get_Name() { return Name; }
+	int Get_Code() { return code; }
+};
+
+//  функции класса Phone book
+void Show(telef* book, int size)
+{
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | 0);
+	cout << "#" << setw(14) << "\t\tLast name" << setw(14) << "First name" << setw(20) << "Second name";
+	cout << setw(8) << "Country" << setw(15) << "Phone number" << setw(7) << "\t\te - mail\n\n";
+	for (int i = 0; i < size; i++)
+	{
+		if (book[i].Get_ind() == 1)
+		{
+			SetConsoleTextAttribute(hStdOut, 9 | 0);
+			cout << i + 1 << "\t";
+			book[i].Show();
+		}
+		else
+		{
+			SetConsoleTextAttribute(hStdOut, 15 | 0);
+			cout << i + 1 << "\t";
+			book[i].Show();
+		}
+
+	}
+	SetConsoleTextAttribute(hStdOut, 15 | 0);
+}
+
+void Add(telef*& book, int& size, country* list, int size1)
+{
+	char Lname[100], Fname[100], Sname[100];//переменные для обрабатываемого класса
+	char tel[30], mail[100];
+	int coun, ind;
+
+	regex tx("([0-9]{2})(\\-[0-9]{3})(\\-[0-9]{2})(\\-[0-9]{2})");//регулярное выражение
+	bool job = 1;// переменные для проверок
+	int choice = 0;
+	int k, k1, k2, l;
+	char buff[100];
+	char* tmp;
+
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	telef* temp = new telef[size + 1];
+	for (int i = 0; i < size; i++)
+		temp[i] = book[i];
+	delete[] book;
+	book = temp;
+
+	cin.ignore();
+	cout << "Enter  Last name\n"; cin.getline(Lname, 100);
+	cout << "\n";
+	cout << "Enter  First name\n"; cin.getline(Fname, 100);
+	cout << "\n";
+	cout << "Enter  Second name\n"; cin.getline(Sname, 100);
+	cout << "\n";
+	do// проверка вводимого кода страны, методом сравнения с классом стран/кодов из другого файла
+	{
+		cout << "Enter number of country  = "; cin >> coun;
+		cout << "\n";
+		k = 0;
+		for (int i = 0; i < size1; i++)
+		{
+
+			if (list[i].Get_Code() == coun)
+			{
+				cout << "True code, name of country = " << list[i].Get_Name() << "\n";
+				k++;
+				job = 0;
+			}
+			else continue;
+		}
+		if (k == 0)
+		{
+			cout << "There isn't such country code\n";
+			job = 1;
+		}
+	} while (job);
+	job = 1;
+	do // проверка номера телефона с использованием метода регулярных выражений
+	{
+		cin.ignore();
+		cout << "Enter  Phone number\n"; cin.getline(tel, 100);
+		cout << "\n";
+		if (regex_match(tel, tx) == 1) job = 0;
+		else
+		{
+			cout << "Wrong phone number\n";
+		}
+	} while (job);
+	job = 1;
+	do // проверка почты, методом переборки по-символьно
+	{
+		cout << "Enter  e-mail\n"; cin.getline(mail, 100);
+		cout << "\n";
+		system("cls");
+		SetConsoleTextAttribute(hStdOut, 14 | 4);
+		cout << "Process checking name of e-mail.............\n\n";
+		SetConsoleTextAttribute(hStdOut, 15 | 0);
+		k = 0;
+		k1 = 0;
+		k2 = 0;
+		strcpy(buff, mail);
+		tmp = strtok(buff, "@");
+		for (int i = 0; i < strlen(mail) + 1; i++)// проводим необходимые подсчеты
+		{
+			if (mail[i] == '@')
+				k++;
+			if (mail[i] == '.')
+				k1++;
+			else continue;
+		}
+		for (int j = 0; j < strlen(tmp) + 1; j++)
+		{
+			if (tmp[j] == '&' || tmp[j] == '=' || tmp[j] == '+' || tmp[j] == '_' || tmp[j] == '<')
+				k2++;
+		}
+		if (k != 1)
+		{
+			cout << "Amount of '@' = " << k << ".......That's wrong\n";
+			cout << "Please check your e-mail and enter again!!!\n";
+		}
+		else
+		{
+			cout << "Amount of @ = " << k << ".......That's accept\n";
+			if (strlen(mail) < 5 || strlen(mail) > 25)
+			{
+				cout << "Amount of simbols in the mail name = " << strlen(mail) << ".......That's wrong\n";
+				cout << "Please check your e-mail and enter again!!!\n";
+			}
+			else
+			{
+				cout << "Amount of symbols in the mail name = " << strlen(mail) << ".......That's accept\n";
+				if (k1 != 1)
+				{
+					cout << "Amount of '.' = " << k1 << ".......That's wrong\n";
+					cout << "Please check your e-mail and enter again!!!\n";
+				}
+				else
+				{
+					cout << "Amount of '.' = " << k1 << ".......That's accept\n";
+					if (strlen(tmp) < 1 || strlen(tmp) > 12)
+					{
+						cout << "Amount of name symbols = " << strlen(tmp) << ".......That's wrong\n";
+						cout << "Please check your e-mail and enter again!!!\n";
+					}
+					else
+					{
+						cout << "Amount of name symbols = " << strlen(tmp) << ".......That's accept\n";
+						if (k2 != 0)
+						{
+							cout << "Mail name have wrong symbols, amount = " << k2 << ".......That's wrong\n";
+							cout << "Please check your e-mail and enter again!!!\n";
+						}
+						else
+						{
+							cout << "Mail name doesn't have wrong symbols" << ".......That's accept\n";
+							tmp = strtok(NULL, ".");
+							if (strlen(tmp) < 2 || strlen(tmp) > 8)
+							{
+								cout << "Name of domen has wrong amount of symbols = " << strlen(tmp) << ".......That's wrong\n";
+								cout << "Please check your e-mail and enter again!!!\n";
+							}
+							else
+							{
+								cout << "Name of domen has amount of symbols = " << strlen(tmp) << ".......That's accept\n";
+								tmp = strtok(NULL, "\n");
+								if (strlen(tmp) < 2 || strlen(tmp) > 3)
+								{
+									cout << "Extension of domen name has wrong amount of symbols = " << strlen(tmp) << "......That's wrong\n";
+									cout << "Please check your e-mail and enter again!!!\n";
+								}
+								else
+								{
+									cout << "Extension of domen name has amount of symbols = " << strlen(tmp) << "......That's accept\n";
+									cout << "\n\n";
+									job = 0;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+	} while (job);
+	ind = 0;
+	book[size].Set(Lname, Fname, Sname, coun, tel, mail, ind);
+	size++;
+}
+void Dell_Index(telef*& book, int& size)
+{
+	int index;
+	cout << "Enter index of person to delete \n";
+	cin >> index;
+	if (index - 1 < 0 || index - 1 > size - 1) cout << "Wrong index!!!";
+	else
+	{
+		telef* temp = new telef[size + 1];
+		for (int i = 0; i < size; i++)
+			if (i < index - 1)
+			{
+				temp[i] = book[i];
+			}
+			else if (i > index - 1)
+			{
+				temp[i - 1] = book[i];
+			}
+		delete[] book;
+		book = temp;
+		size--;
+	}
+}
+void Elect_Index(telef*& book, int& size)
+{
+	int index;
+	cout << "Enter index of person, that you want to elect \n";
+	cin >> index;
+	if (index - 1 < 0 || index - 1 > size - 1) cout << "Wrong index!!!";
+	else
+	{
+		for (int i = 0; i < size; i++)
+			if (index == i + 1) book[i].Set_ind(1);
+	}
+}
+void Show_Favor(telef*& book, int& size)
+{
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | 0);
+	cout << "#" << setw(14) << "\t\tLast name" << setw(14) << "First name" << setw(20) << "Second name";
+	cout << setw(8) << "Country" << setw(15) << "Phone number" << setw(7) << "\t\te - mail\n\n";
+	for (int i = 0; i < size; i++)
+	{
+		if (book[i].Get_ind() == 1)
+		{
+			SetConsoleTextAttribute(hStdOut, 9 | 0);
+			book[i].Show();
+		}
+		else continue;
+	}
+	SetConsoleTextAttribute(hStdOut, 15 | 0);
+}
+void Sort(telef* book, int size)
+{
+	bool job2 = 1;
+	int choice1;
+
+	while (job2)
+	{
+		if (size < 2)
+		{
+			cout << "Not enough persons to sort \n";
+			job2 = 0;
+		}
+		else
+		{
+			cout << "Enter choice of Sort\n1-Last Name\n2-First name\n3-Country\n0-Exit\n";
+			cin >> choice1;
+			switch (choice1)
+			{
+			case 1:
+			{
+				for (int i = 0; i < size; i++)
+					for (int j = 0; j < size - i - 1; j++)
+						if (book[j].Get_Lname()[0] > book[j + 1].Get_Lname()[0])
+							swap(book[j], book[j + 1]);
+
+				Show(book, size);
+				break;
+			}
+			case 2:
+			{
+				for (int i = 0; i < size; i++)
+					for (int j = 0; j < size - i - 1; j++)
+						if (book[j].Get_Fname()[0] > book[j + 1].Get_Fname()[0])
+							swap(book[j], book[j + 1]);
+
+				Show(book, size);
+				break;
+			}
+			case 3:
+			{
+				for (int i = 0; i < size; i++)
+					for (int j = 0; j < size - i - 1; j++)
+						if (book[j].Get_Coun() < book[j + 1].Get_Coun())
+							swap(book[j], book[j + 1]);
+
+				Show(book, size);
+				break;
+			case 0: job2 = 0; break;
+			default:cout << "Wrong choice\n"; break;
+
+			}
+			}
+		}
+	}
+}
+void Find(telef* book, int size)
+{
+	int find = 0;
+	int choice = 0;
+	char temp[50];
+
+	bool job = 1;
+	bool job2 = 1;
+	int count = 0;
+	int k = 0;
+
+	while (job2)
+	{
+		cout << "Enter variant that that you want to find:\n1 - Last name\n2 - First Name\n3 - Country\n0 - Exit search\n";
+		cin >> choice;
+		switch (choice)
+		{
+		case 1:
+			do
+			{
+				cin.ignore();
+				cout << "Enter Last name, that you want to find\n"; cin.getline(temp, 50);
+				count = strlen(temp);
+				if (count > 5) cout << "Wrong size to found\n";
+				cout << "\n";
+			} while (count < 0 && count > 5);
+			for (int i = 0; i < size; i++)
+			{
+				if (!strncmp(book[i].Get_Lname(), temp, count))
+				{
+					book[i].Show();
+					k++;
+				}
+				else continue;
+			}
+			if (k == 0) cout << "Can't find such last name\n";
+			break;
+		case 2:
+			do
+			{
+				cin.ignore();
+				cout << "Enter First name, that you want to find\n"; cin.getline(temp, 50);
+				count = strlen(temp);
+				if (count > 5) cout << "Wrong size to found\n";
+				cout << "\n";
+			} while (count < 0 && count > 5);
+			for (int i = 0; i < size; i++)
+			{
+				if (!strncmp(book[i].Get_Fname(), temp, count))
+				{
+					book[i].Show();
+					k++;
+					job = 0;
+				}
+				else continue;
+			}
+			if (k == 0) cout << "Can't find such first name\n";
+			break;
+		case 3:
+			cout << "Enter code of country, that you want to find\n";
+			cin >> find;
+			for (int i = 0; i < size; i++)
+			{
+				if (find == book[i].Get_Coun())
+				{
+					book[i].Show();
+					count++;
+				}
+				else continue;
+			}
+			cout << "\n";
+			if (count == 0) cout << "There isn't such country in the list with code = " << find << "\n\n";
+			break;
+		case 0: job2 = 0; break;
+		default:cout << "Wrong choice\n"; break;
+		}
+	}
+}
+
+void Write_File(telef*& book, int size, char* filename)
+{
+
+	char t[20];
+	FILE* file = fopen(filename, "w");
+	for (int i = 0; i < size; i++)
+	{
+		fputs(book[i].Get_Lname(), file);
+		fputc(' ', file);
+		fputs(book[i].Get_Fname(), file);
+		fputc(' ', file);
+		fputs(book[i].Get_Sname(), file);
+		fputc(';', file);
+		fputc('+', file);
+		sprintf(t, "%i", book[i].Get_Coun());
+		fputs(t, file);
+		fputc('-', file);
+		fputs(book[i].Get_tel(), file);
+		fputc(';', file);
+		fputs(book[i].Get_mail(), file);
+		fputc(';', file);
+		sprintf(t, "%i", book[i].Get_ind());
+		fputs(t, file);
+		fputc(';', file);
+		fputc('\n', file);
+	}
+	fclose(file);
+}
+void Read_File(telef*& book, int& size, char* filename)
+{
+	int count = 0;
+	char buff[300];
+	char* t;
+
+	FILE* file = fopen(filename, "r");
+	if (!file)
+		cout << "File not open! \n";
+	else
+	{
+		while (fgets(buff, 300, file))
+			count++;
+		rewind(file);
+
+		telef* temp = new telef[size + count];
+		for (int i = 0; i < size; i++)
+			temp[i] = book[i];
+		delete[] book;
+		book = temp;
+
+		for (int i = 0; i < size + count; i++)
+		{
+			fgets(buff, 300, file);
+			t = strtok(buff, " ");
+			book[i].Set_Lname(t);
+			t = strtok(NULL, " ");
+			book[i].Set_Fname(t);
+			t = strtok(NULL, ";+");
+			book[i].Set_Sname(t);
+			t = strtok(NULL, "-");
+			book[i].Set_coun(atoi(t));
+			t = strtok(NULL, ";");
+			book[i].Set_tel(t);
+			t = strtok(NULL, ";");
+			book[i].Set_mail(t);
+			t = strtok(NULL, ";");
+			book[i].Set_ind(atoi(t));
+
+		}
+		size += count;
+	}
+	fclose(file);
+}
+
+// функции класса Country
+void Read_Count(country*& list, int& size1)
+{
+	int count = 0;
+	char buff[300];
+	char* t;
+
+	FILE* file = fopen("Coun.txt", "r");
+	if (!file)
+		cout << "File not open! \n";
+	else
+	{
+		while (fgets(buff, 300, file))
+			count++;
+		rewind(file);
+
+		country* temp = new country[size1 + count];
+		for (int i = 0; i < size1; i++)
+			temp[i] = list[i];
+		delete[] list;
+		list = temp;
+
+		for (int i = 0; i < size1 + count; i++)
+		{
+			fgets(buff, 300, file);
+			t = strtok(buff, ";");
+			list[i].Set_Name(t);
+			t = strtok(NULL, ";");
+			list[i].Set_code(atoi(t));
+		}
+		size1 += count;
+	}
+	fclose(file);
+}
+void Show_Count(country* list, int size1)
+{
+	cout << "#" << setw(30) << "Name of country" << setw(15) << "Country code\n";
+
+	for (int i = 0; i < size1; i++)
+	{
+		cout << i + 1 << "\t";
+		list[i].Show();
+	}
+}
+
+void main()
+{
+	srand(time(NULL));
+	telef* book = nullptr;
+	country* list = nullptr;
+	int size = 0;
+	int size1 = 0;
+
+	int choice;
+	int choice1, choice2, choice3;
+	bool job = 1;
+	bool job1 = 1;
+	bool job3 = 1;
+	int index = 0;
+
+	int temp = 0;
+	char temp1[100];
+	char filename[100];
+	char filename1[100];
+	char temp2[] = { "\t\tList of elected persons" };
+	// переменные для перемещений внутри массива и вывода в файл выбранной информации
+	enum Direction { STOP = 0, LEFT, RIGHT, UP, DOWN };
+	Direction dir;
+	bool over;
+	int col, row;
+	int x, y;
+	int k1 = 0;
+
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	Read_Count(list, size1);
+	while (job)
+	{
+		if (size == 0)
+		{
+			cout << "Enter choice of action\n1-Add\n2-Read book from file\n0-Exit\n";
+			cin >> choice;
+			if (choice == 1) Add(book, size, list, size1);
+			else if (choice == 2)
+			{
+				cin.ignore();
+				cout << "Enter filename\n"; cin.getline(filename, 100);
+				Read_File(book, size, filename);
+			}
+			else if (choice == 0) job = 0;
+			else cout << "Wrong choice\n";
+		}
+		else
+		{
+			cout << "Enter choice of action\n1 - Add\n2 - Show\n3 - Dell Index\n4 - Edit book\n";
+			cout << "5 - Sort book\n6 - Write book to file\n7 - Find\n8 - Elected person\n0 - Exit\n";
+			cin >> choice;
+			switch (choice)
+			{
+			case 1:	Add(book, size, list, size1);	break;
+			case 2: Show(book, size); break;
+			case 3: Dell_Index(book, size); break;
+			case 4:
+				Show(book, size);
+				int index;
+				cout << "Enter choice of edition\n";
+				cout << "1-Last name\n2-First name\n3-Second name\n4-Code of country\n";
+				cout << "5-Phone number\n6-Email of person\n";
+				cin >> choice1;
+				cout << "Choose index for edition\n";
+				cin >> index;
+				if (index<1 || index>size)	cout << "Wrong index for edition\n";
+				else
+				{
+					switch (choice1)
+					{
+					case 1: book[index - 1].Edit_Lame(temp1); break;
+					case 2: book[index - 1].Edit_Fame(temp1); break;
+					case 3: book[index - 1].Edit_Sname(temp1); break;
+					case 4: book[index - 1].Edit_Coun(temp); break;
+					case 5: book[index - 1].Edit_Tel(temp1); break;
+					case 6: book[index - 1].Edit_Mail(temp1); break;
+					default: cout << "Wrong choice\n"; break;
+					}
+				}
+				break;
+
+			case 5: Sort(book, size); break;
+			case 6:
+				cin.ignore();
+				cout << "Enter filename\n"; cin.getline(filename, 100);
+				Write_File(book, size, filename); break;
+			case 7: Find(book, size); break;
+			case 8:
+				Show(book, size);
+				while (job1)
+				{
+					cout << "Enter choice of activity with elected persons\n";
+					cout << "1 - Elect person\n";
+					cout << "2 - Show only elected persons\n";
+					cout << "3 - Write elected persons to file\n";
+					cout << "4 - Unelect person\n";
+					cout << "0 - Exit activities\n";
+					cin >> choice2;
+					switch (choice2)
+					{
+					case 1:	Elect_Index(book, size); break;
+					case 2: Show_Favor(book, size); break;
+					case 3:
+					{
+						char t1[20];
+						cin.ignore();
+						cout << "Enter filename\n"; cin.getline(filename1, 100);
+						FILE* file1 = fopen(filename1, "w");
+						fputs(temp2, file1);
+						fputc('\n\n', file1);
+						for (int i = 0; i < size; i++)
+						{
+							if (book[i].Get_ind() == 1)
+							{
+								fputs(book[i].Get_Lname(), file1);
+								fputc(' ', file1);
+								fputs(book[i].Get_Fname(), file1);
+								fputc(' ', file1);
+								fputs(book[i].Get_Sname(), file1);
+								fputc(';', file1);
+								fputc('+', file1);
+								sprintf(t1, "%i", book[i].Get_Coun());
+								fputs(t1, file1);
+								fputc('-', file1);
+								fputs(book[i].Get_tel(), file1);
+								fputc(';', file1);
+								fputs(book[i].Get_mail(), file1);
+								fputc(';', file1);
+								sprintf(t1, "%i", book[i].Get_ind());
+								fputs(t1, file1);
+								fputc(';', file1);
+								fputc('\n', file1);
+							}
+							else continue;
+						}
+						fclose(file1);
+						break;
+					}
+					case 4:
+						int index;
+						cout << "Enter index of person, that you want to elect \n";
+						cin >> index;
+						if (index - 1 < 0 || index - 1 > size - 1) cout << "Wrong index!!!";
+						else
+						{
+							for (int i = 0; i < size; i++)
+								if (index == i + 1) book[i].Set_ind(0);
+						}
+						break;
+					case 0: job1 = 0; break;
+					default:cout << "Wrong choice\n"; break;
+					}
+				}
+				break;
+			case 0: job = 0; break;
+			default:cout << "Wrong choice\n"; break;
+			}
+
+		}
+	}
+
+	// Show_Count(list, size1);
+	// управление с клавиатуры просмотром полей экземпляров класса
+	///определяем стартовую точку
+	over = 1;
+	dir = STOP;
+	x = 0;
+	y = 0;
+	col = 8;
+	row = size;
+	// переменные для записи выбранных полей в блокнот
+	char t2[20];
+	int t3 = 0;
+	char filename2[] = "Note mail.txt";
+	char filename3[] = "Note tel.txt";
+	bool over1 = 1;
+	FILE* file2 = fopen(filename2, "w");
+	FILE* file3 = fopen(filename3, "w");
+
+	while (over)
+	{
+		// нарисуем массив экземпляров класса
+
+		system("cls");
+		SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | 0);
+		cout << "#" << setw(14) << "\t\tLast name" << setw(14) << "First name" << setw(20) << "Second name";
+		cout << setw(8) << "Country" << setw(15) << "Phone number" << setw(7) << "\t\te - mail\n\n";
+		SetConsoleTextAttribute(hStdOut, 15 | 0);
+
+		for (int i = 0; i < row; i++)
+		{
+			for (int j = 0; j < col; j++)
+			{
+				if (i == x && j == y)
+				{
+					SetConsoleTextAttribute(hStdOut, (((2 << 4) | 14)));
+
+				}
+				else
+					SetConsoleTextAttribute(hStdOut, 11 | 0);
+				if (j == 0) cout << i;
+				else if (j == 1) cout << setw(14) << book[i].Get_Lname();
+				else if (j == 2) cout << setw(14) << book[i].Get_Fname();
+				else if (j == 3) cout << setw(20) << book[i].Get_Sname();
+				else if (j == 4) cout << setw(8) << book[i].Get_Coun();
+				else if (j == 5) cout << setw(15) << book[i].Get_tel();
+				else if (j == 6) cout << setw(30) << book[i].Get_mail();
+				else cout << setw(7) << book[i].Get_ind();
+			}
+			cout << "\n";
+
+		}
+		SetConsoleTextAttribute(hStdOut, 15 | 0);
+		cout << "\n\n";
+		cout << "Enter actions: A - LEFT\tD - RIGHT\tW - UP\tS - DOWN\t'space' - STOP\n\n";
+		cout << "If you want to go out for note info - tape STOP than X\n\n";
+		Sleep(2000);
+		// прописываем действия (движение, останов и выход) по массиву экземпляров класса
+		if (_kbhit())
+		{
+			switch (_getch())
+			{
+			case 'a':
+				dir = LEFT;
+				break;
+			case 'd':
+				dir = RIGHT;
+				break;
+			case 'w':
+				dir = UP;
+				break;
+			case 's':
+				dir = DOWN;
+				break;
+			case ' ':
+				dir = STOP;
+				break;
+			case 'x':
+				while (over1)
+				{
+					cout << "Enter choice of actiont with info:\n";
+					cout << "1 - Write to note pone number\n2 - Write to note e-mail\n0 - Exit action\n";
+					cin >> choice3;
+					switch (choice3)
+					{
+					case 1:
+						fputs(book[x].Get_Lname(), file3);
+						fputc(' ', file3);
+						fputs(book[x].Get_Fname(), file3);
+						fputc(';', file3);
+						fputc('+', file3);
+						sprintf(t2, "%i", book[x].Get_Coun());
+						fputs(t2, file3);
+						fputc('-', file3);
+						fputs(book[x].Get_tel(), file3);
+						fputc(';', file3);
+						fputc('\n', file3);
+						break;
+					case 2:
+						fputs(book[x].Get_Lname(), file2);
+						fputc(' ', file2);
+						fputs(book[x].Get_Fname(), file2);
+						fputc(';', file2);
+						fputs(book[x].Get_mail(), file2);
+						fputc(';', file2);
+						fputc('\n', file2);
+						break;
+					case 0:	over1 = 0; break;
+					default: cout << "Wrong choice!!\n";
+					}
+				}
+				over = 0;
+			}
+		}
+		// описываем логику действий- перемещений для просмотра полей классов
+		switch (dir)
+		{
+		case LEFT:
+			y--;
+			break;
+		case RIGHT:
+			y++;
+			break;
+		case UP:
+			x--;
+			break;
+		case DOWN:
+			x++;
+			break;
+		}
+		if (y > col - 1)
+			y = 0;
+		else if (y < 0)
+			y = col;
+		if (x > row - 1)
+			x = 0;
+		else if (x < 0)
+			x = row;
+	}
+		fclose(file2);
+		fclose(file3);
+
+
+	for (int i = 0; i < size1; i++)
+		list[i].Del();
+	delete[] list;
+
+	for (int i = 0; i < size; i++)
+		book[i].Del();
+	delete[] book;
+}
